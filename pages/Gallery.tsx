@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { GalleryImage } from '../types';
 
 function thumbSrc(src: string): string {
@@ -33,6 +33,48 @@ const images: GalleryImage[] = [
   { id: 24, src: '/images/gallery/_GMD5279.jpg',                              alt: 'Kuchipudi classical dance performance' },
   { id: 25, src: '/images/gallery/_GMD5036.jpg',                              alt: 'Kuchipudi — ghungroo detail' },
 ];
+
+const GalleryTile: React.FC<{ img: GalleryImage; idx: number; onClick: () => void }> = ({ img, idx, onClick }) => {
+  const [src, setSrc] = useState<string | undefined>(idx < 8 ? thumbSrc(img.src) : undefined);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (idx < 8) return;
+    const el = ref.current;
+    if (!el) return;
+    const resolvedSrc = thumbSrc(img.src); // capture before closure
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setSrc(resolvedSrc); obs.disconnect(); } },
+      { rootMargin: '400px 0px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [idx, img.src]);
+
+  return (
+    <div
+      ref={ref}
+      className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl animate-slide-in-up bg-gray-900"
+      style={{ animationDelay: `${idx * 60}ms`, ...(src ? {} : { minHeight: '220px' }) }}
+      onClick={onClick}
+    >
+      {src && (
+        <img
+          src={src}
+          alt={img.alt}
+          decoding="async"
+          onError={e => { (e.currentTarget as HTMLImageElement).src = img.src; }}
+          className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      )}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+        <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+        </svg>
+      </div>
+    </div>
+  );
+};
 
 const Gallery: React.FC = () => {
   const [selectedIdx, setSelectedIdx] = useState<number>(-1);
@@ -78,30 +120,7 @@ const Gallery: React.FC = () => {
         {/* Masonry grid */}
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
           {images.map((img, i) => (
-            <div
-              key={img.id}
-              className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl animate-slide-in-up"
-              style={{ animationDelay: `${i * 60}ms` }}
-              onClick={() => open(i)}
-            >
-              <img
-                src={thumbSrc(img.src)}
-                alt={img.alt}
-                loading="lazy"
-                onError={e => { (e.currentTarget as HTMLImageElement).src = img.src; }}
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                </svg>
-              </div>
-            </div>
+            <GalleryTile key={img.id} img={img} idx={i} onClick={() => open(i)} />
           ))}
         </div>
       </div>

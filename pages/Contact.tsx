@@ -203,10 +203,10 @@ const Contact: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 max-w-5xl mx-auto animate-slide-in-up" style={{ animationDelay: '80ms' }}>
 
           {/* ── Left panel ── */}
-          <div className="lg:col-span-2 space-y-10 animate-slide-in-left">
+          <div className="lg:col-span-2 space-y-10">
             {/* Email */}
             <div>
               <p className="text-xs tracking-widest uppercase text-gray-400 mb-2">Email</p>
@@ -258,7 +258,7 @@ const Contact: React.FC = () => {
           </div>
 
           {/* ── Form ── */}
-          <div className="lg:col-span-3 animate-slide-in-up" style={{ animationDelay: '100ms' }}>
+          <div className="lg:col-span-3">
             {status === 'success' ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10">
                 <div className="w-16 h-16 rounded-full bg-gold-50 dark:bg-gold-900/20 flex items-center justify-center mb-6">
@@ -379,7 +379,7 @@ const Contact: React.FC = () => {
                 {/* Cloudflare Turnstile — mounts/unmounts with the form so widget always re-renders */}
                 <div>
                   <p className="text-xs tracking-widest uppercase text-gray-400 mb-2">Verification</p>
-                  <div className="turnstile-container">
+                  <div className="turnstile-container min-h-[65px]">
                     <TurnstileWidget onToken={setTurnstileToken} />
                   </div>
                   {!turnstileToken && (

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Dark background with rounded corners -->
+  <rect width="64" height="64" rx="12" fill="#0f0f0f"/>
+  <!-- Decorative top rule -->
+  <line x1="12" y1="16" x2="52" y2="16" stroke="#C9A84C" stroke-width="0.8" opacity="0.6"/>
+  <!-- MS monogram -->
+  <text x="32" y="42" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="400" fill="#C9A84C" letter-spacing="2">MS</text>
+  <!-- Decorative bottom rule -->
+  <line x1="12" y1="50" x2="52" y2="50" stroke="#C9A84C" stroke-width="0.8" opacity="0.6"/>
+</svg>

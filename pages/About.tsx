@@ -71,7 +71,7 @@ const About: React.FC = () => {
               </p>
               <p>
                 What defines Medha's dance life now is the balance she maintains. She works full-time
-                in <strong className="text-gray-900 dark:text-white font-medium">healthcare strategy and operations</strong>,
+                in healthcare strategy and operations,
                 yet refuses to let her artistic life take a backseat. She splits her time between the U.S. and India,
                 performing in both countries and immersing herself in each art world she encounters.
               </p>
