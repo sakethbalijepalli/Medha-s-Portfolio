@@ -39,12 +39,12 @@ export default {
           '100%': { opacity: '1' },
         },
         slideInUp: {
-          '0%':   { transform: 'translateY(20px)' },
-          '100%': { transform: 'translateY(0)' },
+          '0%':   { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         slideInLeft: {
-          '0%':   { transform: 'translateX(-20px)' },
-          '100%': { transform: 'translateX(0)' },
+          '0%':   { opacity: '0', transform: 'translateX(-20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
