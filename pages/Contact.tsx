@@ -203,7 +203,7 @@ const Contact: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 max-w-5xl mx-auto animate-slide-in-up" style={{ animationDelay: '80ms' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 max-w-5xl mx-auto animate-slide-in-up">
 
           {/* ── Left panel ── */}
           <div className="lg:col-span-2 space-y-10">

@@ -13,15 +13,6 @@ html { scroll-behavior: smooth; }
 /* Parallax */
 .parallax-hero { will-change: transform; }
 
-/* Page transition — fade OUT only; new page appears instantly so child animations aren't compounded */
-@keyframes pageFadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-.page-fading-out {
-  animation: pageFadeOut 0.2s ease-in-out forwards;
-  pointer-events: none;
-}
 
 /* Gold gradient text */
 .text-gold-gradient {

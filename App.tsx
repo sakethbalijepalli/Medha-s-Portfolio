@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -23,30 +23,17 @@ const TITLES: Record<Page, string> = {
   Contact:    'Contact — Medha Srigiri',
 };
 
-const FADE_MS = 220; // 20ms buffer over the 0.2s CSS animation
-
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('Home');
-  const [fading, setFading] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleNavigate = useCallback((page: Page) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setFading(true);
-    timerRef.current = setTimeout(() => {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      setFading(false);
-    }, FADE_MS);
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
   useEffect(() => {
     document.title = TITLES[currentPage];
   }, [currentPage]);
-
-  useEffect(() => {
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -66,7 +53,7 @@ const App: React.FC = () => {
       <div className="min-h-screen flex flex-col font-sans text-gray-800 dark:text-gray-200">
         <Header currentPage={currentPage} onNavigate={handleNavigate} />
         <main className="flex-grow">
-          <div className={`page-wrapper${fading ? ' page-fading-out' : ''}`}>
+          <div className="page-wrapper">
             {renderPage()}
           </div>
         </main>

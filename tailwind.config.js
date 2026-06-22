@@ -29,8 +29,8 @@ export default {
       animation: {
         'fade-in':       'fadeIn 1s ease-in-out both',
         'fade-in-slow':  'fadeIn 1.8s ease-in-out both',
-        'slide-in-up':   'slideInUp 0.45s ease-out both',
-        'slide-in-left': 'slideInLeft 0.45s ease-out both',
+        'slide-in-up':   'slideInUp 0.3s ease-out both',
+        'slide-in-left': 'slideInLeft 0.3s ease-out both',
         'pulse-soft':    'pulseSoft 3s ease-in-out infinite',
       },
       keyframes: {

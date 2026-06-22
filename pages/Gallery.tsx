@@ -55,7 +55,7 @@ const GalleryTile: React.FC<{ img: GalleryImage; idx: number; onClick: () => voi
     <div
       ref={ref}
       className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl animate-slide-in-up bg-gray-900"
-      style={{ animationDelay: `${idx * 60}ms`, ...(src ? {} : { minHeight: '220px' }) }}
+      style={{ animationDelay: `${idx * 20}ms`, ...(src ? {} : { minHeight: '220px' }) }}
       onClick={onClick}
     >
       {src && (
