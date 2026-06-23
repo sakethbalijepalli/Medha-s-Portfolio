@@ -12,11 +12,15 @@ const Home: React.FC<HomeProps> = ({ onNavigate }) => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let rafId = 0;
     const handleScroll = () => {
-      requestAnimationFrame(() => setScrollY(window.scrollY));
+      rafId = requestAnimationFrame(() => setScrollY(window.scrollY));
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (

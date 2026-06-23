@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { HIGHLIGHTS } from './Highlights';
 
 const EDUCATION = [
   {
@@ -22,13 +23,9 @@ const EDUCATION = [
   },
 ];
 
-const PAST_PERFORMANCES = [
-  { title: 'Kuchipudi Chamber Concert Series', location: 'Dallas, TX',        date: 'June 2026' },
-  { title: 'MANH',                             location: 'Hyderabad, India',   date: 'March 2026' },
-  { title: 'Medai',                            location: 'Bangalore, India',   date: 'September 2025' },
-  { title: 'New York Kuchipudi Dance Festival', location: 'New York, NY',      date: 'August 2025' },
-  { title: '16th American Natya Festival',     location: 'St. Louis, MO',      date: 'June 2025' },
-];
+// Same set shown on the Highlights page (minus imagery). Derived from the
+// single HIGHLIGHTS source so the two pages can't drift.
+const PAST_PERFORMANCES = HIGHLIGHTS;
 
 const About: React.FC = () => {
   return (

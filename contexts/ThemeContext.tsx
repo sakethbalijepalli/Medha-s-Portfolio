@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -10,23 +10,24 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+// Read the saved theme synchronously so the first render matches what the
+// pre-paint script in index.html already applied. Only 'dark' is honored;
+// anything else (missing or corrupt) falls back to 'light'.
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+}
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const initialTheme = localStorage.getItem('theme') as Theme || 'light';
-    setTheme(initialTheme);
-    root.classList.add(initialTheme);
-  }, []);
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    const root = window.document.documentElement;
-    root.classList.remove(theme);
-    root.classList.add(newTheme);
+    // Side effects live in the handler (run once), not inside the setState
+    // updater — StrictMode double-invokes updaters and would corrupt the toggle.
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('theme', next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
   };
 
   return (

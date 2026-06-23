@@ -83,22 +83,19 @@ const Gallery: React.FC = () => {
   const open = (idx: number) => setSelectedIdx(idx);
   const close = () => setSelectedIdx(-1);
 
-  const prev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedIdx(i => (i - 1 + images.length) % images.length);
-  };
+  // Wrap-around step; the i < 0 guard keeps it a no-op while the lightbox is closed.
+  const step = (delta: number) =>
+    setSelectedIdx(i => (i < 0 ? i : (i + delta + images.length) % images.length));
 
-  const next = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedIdx(i => (i + 1) % images.length);
-  };
+  const prev = (e: React.MouseEvent) => { e.stopPropagation(); step(-1); };
+  const next = (e: React.MouseEvent) => { e.stopPropagation(); step(1); };
 
-  // Keyboard nav — single persistent listener; guard is inside functional updaters so deps can be []
+  // Keyboard nav — single persistent listener; functional updaters keep deps []
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedIdx(-1);
-      if (e.key === 'ArrowLeft') setSelectedIdx(i => i < 0 ? i : (i - 1 + images.length) % images.length);
-      if (e.key === 'ArrowRight') setSelectedIdx(i => i < 0 ? i : (i + 1) % images.length);
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

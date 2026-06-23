@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { SOCIAL_LINKS } from '../constants';
+import { isValidEmail } from '../lib/validation';
+import { subscribe } from '../lib/subscribe';
 
 const EMAILJS_PUBLIC_KEY          = 'hH3S3b-dWVLUkbNOF';
 const EMAILJS_SERVICE_ID          = 'service_ts9oglm';
@@ -103,12 +105,13 @@ const Contact: React.FC = () => {
   const [newsletter, setNewsletter]   = useState(false);
   const [newsletterStatus, setNewsletterStatus] = useState<'idle'|'loading'|'success'>('idle');
   const [newsletterEmail, setNewsletterEmail]   = useState('');
+  const [newsletterHp, setNewsletterHp]         = useState(''); // honeypot
 
   const validate = (): boolean => {
     const errs: Partial<FormData> = {};
     if (!form.name.trim())    errs.name    = 'Name is required.';
     if (!form.email.trim())   errs.email   = 'Email is required.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Enter a valid email address.';
+    else if (!isValidEmail(form.email)) errs.email = 'Enter a valid email address.';
     if (!form.subject)        errs.subject = 'Please select a subject.';
     if (!form.message.trim()) errs.message = 'Message is required.';
     setErrors(errs);
@@ -144,15 +147,19 @@ const Contact: React.FC = () => {
         newsletter: newsletter ? 'Yes — please add to list' : 'No',
       };
 
+      // Owner notification is the critical send — if it fails, show an error.
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFICATION_TPL, templateParams, { publicKey: EMAILJS_PUBLIC_KEY });
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_TPL,    templateParams, { publicKey: EMAILJS_PUBLIC_KEY });
+
+      // Auto-reply and newsletter opt-in are best-effort: a failure here must
+      // not make an already-delivered message look like it failed.
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_TPL, templateParams, { publicKey: EMAILJS_PUBLIC_KEY });
+      } catch (err) {
+        console.error('Auto-reply send failed:', err);
+      }
 
       if (newsletter) {
-        await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email, name: form.name }),
-        });
+        await subscribe({ email: form.email, name: form.name });
       }
 
       setStatus('success');
@@ -168,17 +175,8 @@ const Contact: React.FC = () => {
     e.preventDefault();
     if (!newsletterEmail) return;
     setNewsletterStatus('loading');
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newsletterEmail }),
-      });
-      if (!res.ok) throw new Error();
-      setNewsletterStatus('success');
-    } catch {
-      setNewsletterStatus('idle');
-    }
+    const ok = await subscribe({ email: newsletterEmail, hp: newsletterHp });
+    setNewsletterStatus(ok ? 'success' : 'idle');
   };
 
   const inputCls = (field: keyof FormData) =>
@@ -426,6 +424,17 @@ const Contact: React.FC = () => {
             <p className="text-gold-400 font-light">You're subscribed — thank you!</p>
           ) : (
             <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              {/* Honeypot — hidden from real users; bots that fill it are dropped server-side */}
+              <input
+                type="text"
+                name="hp"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={newsletterHp}
+                onChange={e => setNewsletterHp(e.target.value)}
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+              />
               <input
                 type="email"
                 required

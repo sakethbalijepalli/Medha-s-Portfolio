@@ -1,6 +1,7 @@
 
 import React from 'react';
 import type { UpcomingShow } from '../types';
+import { subscribe } from '../lib/subscribe';
 
 const UPCOMING: UpcomingShow[] = [];
 
@@ -106,23 +107,15 @@ const UpcomingPage: React.FC = () => {
 
 const NewsletterForm: React.FC = () => {
   const [email, setEmail] = React.useState('');
+  const [hp, setHp] = React.useState(''); // honeypot
   const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setStatus('loading');
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) throw new Error();
-      setStatus('success');
-    } catch {
-      setStatus('error');
-    }
+    const ok = await subscribe({ email, hp });
+    setStatus(ok ? 'success' : 'error');
   };
 
   if (status === 'success') {
@@ -139,6 +132,17 @@ const NewsletterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      {/* Honeypot — hidden from real users; bots that fill it are dropped server-side */}
+      <input
+        type="text"
+        name="hp"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={hp}
+        onChange={e => setHp(e.target.value)}
+        style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+      />
       <input
         type="email"
         value={email}
