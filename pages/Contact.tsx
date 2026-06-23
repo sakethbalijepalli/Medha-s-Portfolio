@@ -12,24 +12,26 @@ const EMAILJS_AUTOREPLY_TPL       = 'template_fd010hk';
 
 declare global {
   interface Window {
-    turnstile?: {
-      render: (container: HTMLElement, options: {
+    grecaptcha?: {
+      render: (container: HTMLElement, params: {
         sitekey: string;
         callback?: (token: string) => void;
         'expired-callback'?: () => void;
         'error-callback'?: () => void;
-        theme?: 'light' | 'dark' | 'auto';
-      }) => string;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
+        theme?: 'light' | 'dark';
+        size?: 'normal' | 'compact';
+      }) => number;
+      reset: (widgetId?: number) => void;
+      getResponse: (widgetId?: number) => string;
     };
   }
 }
 
-// Cloudflare test key for localhost dev (always passes); real key for production
-const TURNSTILE_SITE_KEY = import.meta.env.DEV
-  ? '1x00000000000000000000AA'
-  : '0x4AAAAAADn5rCTLgaQbZP2x';
+// Google reCAPTCHA v2 — universal test key for dev (always passes); real key for
+// production. Get the production site key from https://www.google.com/recaptcha/admin
+const RECAPTCHA_SITE_KEY = import.meta.env.DEV
+  ? '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+  : '6LcNHTAtAAAAAMr6Y1qR-KrDZZmD0TxUVVTR8fNm';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -49,32 +51,46 @@ const SUBJECTS = [
   'Other',
 ];
 
-const TurnstileWidget: React.FC<{ onToken: (token: string) => void }> = ({ onToken }) => {
+const RecaptchaWidget: React.FC<{
+  onToken: (token: string) => void;
+  resetRef: React.MutableRefObject<() => void>;
+}> = ({ onToken, resetRef }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef  = useRef<string>('');
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
     let intervalId: ReturnType<typeof setInterval> | null = null;
+    let widgetId: number | null = null;
+    let cancelled = false;
 
     const renderWidget = () => {
-      if (containerRef.current && window.turnstile && !widgetIdRef.current) {
-        widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: onToken,
-          'expired-callback': () => onToken(''),
-          'error-callback':   () => onToken(''),
-          theme: 'auto',
-        });
-      }
+      if (cancelled || !window.grecaptcha?.render) return;
+      // Render into a fresh child node so a remount (form reset / StrictMode)
+      // never reuses an element reCAPTCHA has "already rendered" into.
+      const node = document.createElement('div');
+      container.appendChild(node);
+      widgetId = window.grecaptcha.render(node, {
+        sitekey: RECAPTCHA_SITE_KEY,
+        callback: onToken,
+        'expired-callback': () => onToken(''),
+        'error-callback':   () => onToken(''),
+      });
+      resetRef.current = () => {
+        if (widgetId !== null && window.grecaptcha) {
+          window.grecaptcha.reset(widgetId);
+          onToken('');
+        }
+      };
     };
 
-    if (window.turnstile) {
+    if (window.grecaptcha?.render) {
       renderWidget();
     } else {
-      // Poll until the Turnstile script loads (max 10 s)
+      // Poll until the reCAPTCHA script loads (max 10 s)
       let attempts = 0;
       intervalId = setInterval(() => {
-        if (window.turnstile) {
+        if (window.grecaptcha?.render) {
           clearInterval(intervalId!);
           intervalId = null;
           renderWidget();
@@ -86,20 +102,20 @@ const TurnstileWidget: React.FC<{ onToken: (token: string) => void }> = ({ onTok
     }
 
     return () => {
+      cancelled = true;
       if (intervalId) clearInterval(intervalId);
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = '';
-      }
+      container.innerHTML = '';   // grecaptcha has no remove(); drop the node
+      resetRef.current = () => {};
     };
-  }, []); // onToken is setTurnstileToken — stable across renders
+  }, []); // onToken is setRecaptchaToken — stable across renders
 
   return <div ref={containerRef} />;
 };
 
 const Contact: React.FC = () => {
   const [form, setForm]               = useState<FormData>({ name: '', email: '', phone: '', subject: '', message: '' });
-  const [turnstileToken, setTurnstileToken] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState('');
+  const recaptchaResetRef             = useRef<() => void>(() => {});
   const [status, setStatus]           = useState<FormStatus>('idle');
   const [errors, setErrors]           = useState<Partial<FormData>>({});
   const [newsletter, setNewsletter]   = useState(false);
@@ -130,7 +146,7 @@ const Contact: React.FC = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (!turnstileToken) {
+    if (!recaptchaToken) {
       alert('Please complete the CAPTCHA verification.');
       return;
     }
@@ -145,15 +161,26 @@ const Contact: React.FC = () => {
         subject:    form.subject,
         message:    form.message,
         newsletter: newsletter ? 'Yes — please add to list' : 'No',
+        // EmailJS verifies this token server-side when reCAPTCHA is enabled on the template.
+        'g-recaptcha-response': recaptchaToken,
       };
 
       // Owner notification is the critical send — if it fails, show an error.
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFICATION_TPL, templateParams, { publicKey: EMAILJS_PUBLIC_KEY });
+      // blockHeadless rejects bot/headless traffic; limitRate throttles repeat submits.
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_NOTIFICATION_TPL, templateParams, {
+        publicKey: EMAILJS_PUBLIC_KEY,
+        blockHeadless: true,
+        limitRate: { id: 'contact', throttle: 10000 },
+      });
 
       // Auto-reply and newsletter opt-in are best-effort: a failure here must
-      // not make an already-delivered message look like it failed.
+      // not make an already-delivered message look like it failed. No limitRate
+      // here — it runs right after the notification and shares its throttle window.
       try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_TPL, templateParams, { publicKey: EMAILJS_PUBLIC_KEY });
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_AUTOREPLY_TPL, templateParams, {
+          publicKey: EMAILJS_PUBLIC_KEY,
+          blockHeadless: true,
+        });
       } catch (err) {
         console.error('Auto-reply send failed:', err);
       }
@@ -165,7 +192,8 @@ const Contact: React.FC = () => {
       setStatus('success');
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
       setNewsletter(false);
-      setTurnstileToken('');
+      setRecaptchaToken('');
+      recaptchaResetRef.current();
     } catch {
       setStatus('error');
     }
@@ -374,13 +402,13 @@ const Contact: React.FC = () => {
                   </span>
                 </label>
 
-                {/* Cloudflare Turnstile — mounts/unmounts with the form so widget always re-renders */}
+                {/* reCAPTCHA — mounts/unmounts with the form so the widget always re-renders */}
                 <div>
                   <p className="text-xs tracking-widest uppercase text-gray-400 mb-2">Verification</p>
-                  <div className="turnstile-container min-h-[65px]">
-                    <TurnstileWidget onToken={setTurnstileToken} />
+                  <div className="min-h-[78px]">
+                    <RecaptchaWidget onToken={setRecaptchaToken} resetRef={recaptchaResetRef} />
                   </div>
-                  {!turnstileToken && (
+                  {!recaptchaToken && (
                     <p className="text-xs text-gray-400 mt-2">
                       Please complete the security check above before sending.
                     </p>
@@ -403,7 +431,9 @@ const Contact: React.FC = () => {
                 )}
 
                 <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-                  Protected by Cloudflare Turnstile. Your information is never shared with third parties.
+                  Protected by reCAPTCHA — Google's{' '}
+                  <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-gold-500">Privacy Policy</a>{' '}and{' '}
+                  <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-gold-500">Terms</a>{' '}apply. Your information is never shared with third parties.
                 </p>
               </form>
             )}

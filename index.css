@@ -59,8 +59,3 @@ html { scroll-behavior: smooth; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-/* Turnstile container — reserve space to prevent layout shift */
-.turnstile-container {
-  min-height: 65px;
-}
