@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { SOCIAL_LINKS } from '../constants';
 import { isValidEmail } from '../lib/validation';
 import { subscribe } from '../lib/subscribe';
@@ -154,10 +156,14 @@ const Contact: React.FC = () => {
     setStatus('loading');
 
     try {
+      // form.phone is an E.164 value that always carries the dial code (e.g. "+1").
+      // Treat a value with no national digits as "not provided".
+      const phoneValue = form.phone.replace(/\D/g, '').length >= 7 ? form.phone : 'Not provided';
+
       const templateParams = {
         from_name:  form.name,
         from_email: form.email,
-        phone:      form.phone || 'Not provided',
+        phone:      phoneValue,
         subject:    form.subject,
         message:    form.message,
         newsletter: newsletter ? 'Yes — please add to list' : 'No',
@@ -347,13 +353,14 @@ const Contact: React.FC = () => {
                     <label className="block text-xs font-medium tracking-widest uppercase text-gray-500 mb-1.5">
                       Phone <span className="text-gray-300">(optional)</span>
                     </label>
-                    <input
-                      type="tel"
-                      name="phone"
+                    <PhoneInput
+                      defaultCountry="us"
                       value={form.phone}
-                      onChange={handleChange}
-                      placeholder="+1 (555) 000-0000"
-                      className={inputCls('phone')}
+                      onChange={(phone) => setForm(prev => ({ ...prev, phone }))}
+                      forceDialCode
+                      name="phone"
+                      placeholder="Phone number"
+                      className="phone-input"
                     />
                   </div>
                   <div>

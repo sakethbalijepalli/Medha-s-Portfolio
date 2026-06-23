@@ -59,3 +59,47 @@ html { scroll-behavior: smooth; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* International phone input — match the form's other inputs (light + dark) */
+.phone-input {
+  width: 100%;
+  --react-international-phone-height: 46px;
+  --react-international-phone-font-size: 14px;
+  --react-international-phone-border-radius: 8px;
+  --react-international-phone-border-color: #e5e7eb;            /* gray-200 */
+  --react-international-phone-background-color: #f9fafb;        /* gray-50  */
+  --react-international-phone-text-color: #111827;              /* gray-900 */
+  --react-international-phone-country-selector-background-color: #f9fafb;
+  --react-international-phone-country-selector-background-color-hover: #f3f4f6;
+  --react-international-phone-country-selector-border-color: #e5e7eb;
+  --react-international-phone-country-selector-arrow-color: #6b7280;
+  --react-international-phone-dropdown-item-background-color: #ffffff;
+  --react-international-phone-dropdown-item-text-color: #111827;
+  --react-international-phone-dropdown-item-dial-code-color: #6b7280;
+  --react-international-phone-selected-dropdown-item-background-color: #f3f4f6;
+  --react-international-phone-dropdown-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+.dark .phone-input {
+  --react-international-phone-border-color: #374151;            /* gray-700 */
+  --react-international-phone-background-color: #1f2937;        /* gray-800 */
+  --react-international-phone-text-color: #ffffff;
+  --react-international-phone-country-selector-background-color: #1f2937;
+  --react-international-phone-country-selector-background-color-hover: #374151;
+  --react-international-phone-country-selector-border-color: #374151;
+  --react-international-phone-country-selector-arrow-color: #9ca3af;
+  --react-international-phone-dropdown-item-background-color: #1f2937;
+  --react-international-phone-dropdown-item-text-color: #ffffff;
+  --react-international-phone-dropdown-item-dial-code-color: #9ca3af;
+  --react-international-phone-selected-dropdown-item-background-color: #374151;
+  --react-international-phone-dropdown-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.phone-input .react-international-phone-input { width: 100%; }
+/* gold focus ring on the whole control, matching the other inputs */
+.phone-input:focus-within {
+  box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.25);
+  border-radius: 8px;
+}
+.phone-input:focus-within .react-international-phone-input,
+.phone-input:focus-within .react-international-phone-country-selector-button {
+  border-color: #C9A84C;
+}
