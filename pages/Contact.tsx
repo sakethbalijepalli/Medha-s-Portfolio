@@ -31,7 +31,7 @@ declare global {
 // production. Get the production site key from https://www.google.com/recaptcha/admin
 const RECAPTCHA_SITE_KEY = import.meta.env.DEV
   ? '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
-  : '6LcNHTAtAAAAAMr6Y1qR-KrDZZmD0TxUVVTR8fNm';
+  : '6Le7ITAtAAAAAGwHNuKgHgurhyZ4nf0jaNLExbX5';
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
