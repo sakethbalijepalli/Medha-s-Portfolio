@@ -6,89 +6,87 @@ function thumbSrc(src: string): string {
   return src.replace('/images/gallery/', '/images/gallery/thumbs/');
 }
 
+// w/h are the real pixel dimensions of each source image.
+// The browser uses these to compute aspect ratio and reserve layout space,
+// preventing CLS and ensuring lazy-load threshold is calculated from the
+// correct rendered position (not 0×0). See web.dev/articles/browser-level-image-lazy-loading
 const images: GalleryImage[] = [
-  { id:  1, src: '/images/gallery/Picsart_24-04-21_11-28-33-465.jpg',        alt: 'Medha Srigiri — mudra silhouette' },
-  { id:  2, src: '/images/gallery/medha-yamini-dalal-photography-29.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id:  3, src: '/images/gallery/_GMD5568.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id:  4, src: '/images/gallery/4M1A1225.jpg',                              alt: 'Kuchipudi performance' },
-  { id:  5, src: '/images/gallery/medha-yamini-dalal-photography-24.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id:  6, src: '/images/gallery/DSC06621.jpg',                              alt: 'Kuchipudi stage performance' },
-  { id:  7, src: '/images/gallery/_GMD5533.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id:  8, src: '/images/gallery/medha-yamini-dalal-photography-36.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id:  9, src: '/images/gallery/4M1A1082.jpg',                              alt: 'Kuchipudi performance' },
-  { id: 10, src: '/images/gallery/_GMD5554.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 11, src: '/images/gallery/medha-yamini-dalal-photography-38.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id: 12, src: '/images/gallery/_GMD3298.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 13, src: '/images/gallery/4M1A1054.jpg',                              alt: 'Kuchipudi performance' },
-  { id: 14, src: '/images/gallery/_GMD5395.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 15, src: '/images/gallery/medha-yamini-dalal-photography-35.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id: 16, src: '/images/gallery/DSC06669.jpg',                              alt: 'Kuchipudi stage performance' },
-  { id: 17, src: '/images/gallery/_GMD4784.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 18, src: '/images/gallery/4M1A1156.jpg',                              alt: 'Kuchipudi performance' },
-  { id: 19, src: '/images/gallery/medha-yamini-dalal-photography-42.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id: 20, src: '/images/gallery/_GMD2682.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 21, src: '/images/gallery/4M1A1004.jpg',                              alt: 'Kuchipudi performance' },
-  { id: 22, src: '/images/gallery/medha-yamini-dalal-photography-50.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal' },
-  { id: 23, src: '/images/gallery/_GMD5427.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 24, src: '/images/gallery/_GMD5279.jpg',                              alt: 'Kuchipudi classical dance performance' },
-  { id: 25, src: '/images/gallery/_GMD5036.jpg',                              alt: 'Kuchipudi — ghungroo detail' },
+  { id:  1, src: '/images/gallery/Picsart_24-04-21_11-28-33-465.jpg',        alt: 'Medha Srigiri — mudra silhouette',                   w: 1600, h: 2400 },
+  { id:  2, src: '/images/gallery/medha-yamini-dalal-photography-29.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id:  3, src: '/images/gallery/_GMD5568.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1600, h: 2400 },
+  { id:  4, src: '/images/gallery/4M1A1225.jpg',                              alt: 'Kuchipudi performance',                              w: 2400, h: 1600 },
+  { id:  5, src: '/images/gallery/medha-yamini-dalal-photography-24.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id:  6, src: '/images/gallery/DSC06621.jpg',                              alt: 'Kuchipudi stage performance',                        w: 2400, h: 1833 },
+  { id:  7, src: '/images/gallery/_GMD5533.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1714, h: 2400 },
+  { id:  8, src: '/images/gallery/medha-yamini-dalal-photography-36.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id:  9, src: '/images/gallery/4M1A1082.jpg',                              alt: 'Kuchipudi performance',                              w: 1600, h: 2400 },
+  { id: 10, src: '/images/gallery/_GMD5554.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1641, h: 2400 },
+  { id: 11, src: '/images/gallery/medha-yamini-dalal-photography-38.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id: 12, src: '/images/gallery/_GMD3298.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1708, h: 2400 },
+  { id: 13, src: '/images/gallery/4M1A1054.jpg',                              alt: 'Kuchipudi performance',                              w: 2400, h: 1600 },
+  { id: 14, src: '/images/gallery/_GMD5395.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1625, h: 2400 },
+  { id: 15, src: '/images/gallery/medha-yamini-dalal-photography-35.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id: 16, src: '/images/gallery/DSC06669.jpg',                              alt: 'Kuchipudi stage performance',                        w: 2400, h: 1406 },
+  { id: 17, src: '/images/gallery/_GMD4784.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1729, h: 2400 },
+  { id: 18, src: '/images/gallery/4M1A1156.jpg',                              alt: 'Kuchipudi performance',                              w: 2400, h: 1600 },
+  { id: 19, src: '/images/gallery/medha-yamini-dalal-photography-42.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 2400, h: 1597 },
+  { id: 20, src: '/images/gallery/_GMD2682.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1600, h: 2400 },
+  { id: 21, src: '/images/gallery/4M1A1004.jpg',                              alt: 'Kuchipudi performance',                              w: 2400, h: 1600 },
+  { id: 22, src: '/images/gallery/medha-yamini-dalal-photography-50.jpg',     alt: 'Medha Srigiri — photography by Yamini Dalal',        w: 1597, h: 2400 },
+  { id: 23, src: '/images/gallery/_GMD5427.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 1635, h: 2400 },
+  { id: 24, src: '/images/gallery/_GMD5279.jpg',                              alt: 'Kuchipudi classical dance performance',               w: 2400, h: 1600 },
+  { id: 25, src: '/images/gallery/_GMD5036.jpg',                              alt: 'Kuchipudi — ghungroo detail',                        w: 2400, h: 1600 },
 ];
 
+// First 4 images are above the fold across all column counts (2–4 columns).
+// The article explicitly says never to lazy-load LCP/above-fold images.
+const EAGER_COUNT = 4;
+
 const GalleryTile: React.FC<{ img: GalleryImage; idx: number; onClick: () => void }> = ({ img, idx, onClick }) => {
-  const [src, setSrc] = useState<string | undefined>(undefined);
-  const [revealed, setRevealed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const isEager = idx < EAGER_COUNT;
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const resolvedSrc = thumbSrc(img.src);
-
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight) {
-      // Already visible: load src now, stagger reveal by vertical position
-      setSrc(resolvedSrc);
-      const delay = Math.floor((rect.top / window.innerHeight) * 5) * 80;
-      const id = setTimeout(() => setRevealed(true), delay);
+    if (isEager) {
+      const id = setTimeout(() => setInView(true), idx * 100);
       return () => clearTimeout(id);
     }
-
-    // Below fold: lazy-load src and reveal together on scroll
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setSrc(resolvedSrc);
-          setRevealed(true);
-          obs.disconnect();
-        }
-      },
-      { rootMargin: '120px 0px' }
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { rootMargin: '0px' }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [img.src]);
+  }, [isEager, idx]);
+
+  const visible = imgLoaded && inView;
 
   return (
     <div
       ref={ref}
-      className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800"
-      style={{
-        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-        opacity: revealed ? 1 : 0,
-        transform: revealed ? 'translateY(0)' : 'translateY(16px)',
-        ...(src ? {} : { minHeight: '220px' }),
-      }}
+      className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800"
       onClick={onClick}
     >
-      {src && (
-        <img
-          src={src}
-          alt={img.alt}
-          decoding="async"
-          onError={e => { (e.currentTarget as HTMLImageElement).src = img.src; }}
-          className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-      )}
+      <img
+        src={thumbSrc(img.src)}
+        alt={img.alt}
+        width={img.w}
+        height={img.h}
+        loading={isEager ? 'eager' : 'lazy'}
+        decoding="async"
+        onLoad={() => setImgLoaded(true)}
+        onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = img.src; }}
+        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1)' : 'scale(0.96)',
+          transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        }}
+      />
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
         <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -105,14 +103,12 @@ const Gallery: React.FC = () => {
   const open = (idx: number) => setSelectedIdx(idx);
   const close = () => setSelectedIdx(-1);
 
-  // Wrap-around step; the i < 0 guard keeps it a no-op while the lightbox is closed.
   const step = (delta: number) =>
     setSelectedIdx(i => (i < 0 ? i : (i + delta + images.length) % images.length));
 
   const prev = (e: React.MouseEvent) => { e.stopPropagation(); step(-1); };
   const next = (e: React.MouseEvent) => { e.stopPropagation(); step(1); };
 
-  // Keyboard nav — single persistent listener; functional updaters keep deps []
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedIdx(-1);

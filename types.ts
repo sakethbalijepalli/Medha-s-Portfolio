@@ -17,6 +17,8 @@ export interface GalleryImage {
   id: number;
   src: string;
   alt: string;
+  w: number;
+  h: number;
 }
 
 export interface PerformanceHighlight {
