@@ -49,18 +49,28 @@ const GalleryTile: React.FC<{ img: GalleryImage; idx: number; onClick: () => voi
   const isEager = idx < EAGER_COUNT;
 
   useEffect(() => {
-    if (isEager) {
-      const id = setTimeout(() => setInView(true), idx * 100);
-      return () => clearTimeout(id);
-    }
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
-      { rootMargin: '0px' }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    let obs: IntersectionObserver | null = null;
+
+    const startObs = () => {
+      // rootMargin: 100px keeps images visible briefly after leaving viewport
+      // (prevents flicker on slow scrolls) and starts fading in just before entry
+      obs = new IntersectionObserver(
+        ([entry]) => setInView(entry.isIntersecting),
+        { rootMargin: '100px 0px' }
+      );
+      obs.observe(el);
+    };
+
+    if (isEager) {
+      // Delay observer setup per-tile so above-fold images stagger in on mount
+      const id = setTimeout(startObs, idx * 100);
+      return () => { clearTimeout(id); obs?.disconnect(); };
+    }
+
+    startObs();
+    return () => obs?.disconnect();
   }, [isEager, idx]);
 
   const visible = imgLoaded && inView;
