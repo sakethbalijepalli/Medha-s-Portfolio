@@ -94,6 +94,23 @@ html { scroll-behavior: smooth; }
   --react-international-phone-dropdown-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 .phone-input .react-international-phone-input { width: 100%; }
+
+/* Country selector button was 22px wide — flag emoji completely hidden.
+   Expand with explicit padding and give the inner flex row breathing room. */
+.phone-input .react-international-phone-country-selector-button {
+  padding: 0 10px 0 12px;
+}
+.phone-input .react-international-phone-country-selector-button__button-content {
+  align-items: center;
+  gap: 6px;
+}
+.phone-input .react-international-phone-flag-emoji {
+  width: 20px;
+  height: 15px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
 /* gold focus ring on the whole control, matching the other inputs */
 .phone-input:focus-within {
   box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.25);
