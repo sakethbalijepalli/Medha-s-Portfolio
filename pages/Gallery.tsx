@@ -35,27 +35,49 @@ const images: GalleryImage[] = [
 ];
 
 const GalleryTile: React.FC<{ img: GalleryImage; idx: number; onClick: () => void }> = ({ img, idx, onClick }) => {
-  const [src, setSrc] = useState<string | undefined>(idx < 8 ? thumbSrc(img.src) : undefined);
+  const [src, setSrc] = useState<string | undefined>(undefined);
+  const [revealed, setRevealed] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (idx < 8) return;
     const el = ref.current;
     if (!el) return;
-    const resolvedSrc = thumbSrc(img.src); // capture before closure
+    const resolvedSrc = thumbSrc(img.src);
+
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight) {
+      // Already visible: load src now, stagger reveal by vertical position
+      setSrc(resolvedSrc);
+      const delay = Math.floor((rect.top / window.innerHeight) * 5) * 80;
+      const id = setTimeout(() => setRevealed(true), delay);
+      return () => clearTimeout(id);
+    }
+
+    // Below fold: lazy-load src and reveal together on scroll
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setSrc(resolvedSrc); obs.disconnect(); } },
-      { rootMargin: '400px 0px' }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setSrc(resolvedSrc);
+          setRevealed(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: '120px 0px' }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [idx, img.src]);
+  }, [img.src]);
 
   return (
     <div
       ref={ref}
-      className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl animate-slide-in-up bg-gray-900"
-      style={{ animationDelay: `${idx * 20}ms`, ...(src ? {} : { minHeight: '220px' }) }}
+      className="mb-4 break-inside-avoid group relative cursor-pointer overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800"
+      style={{
+        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(16px)',
+        ...(src ? {} : { minHeight: '220px' }),
+      }}
       onClick={onClick}
     >
       {src && (
