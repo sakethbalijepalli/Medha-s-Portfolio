@@ -1,7 +1,11 @@
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+
+// Code-split so the tracker's JS/CSS (and its private Supabase config) never
+// ships to a visitor browsing the public marketing pages.
+const TrackerApp = lazy(() => import('./tracker/TrackerApp'));
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -9,8 +13,16 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+const isTracker = window.location.pathname.startsWith('/tracker');
+
 root.render(
   <React.StrictMode>
-    <App />
+    {isTracker ? (
+      <Suspense fallback={null}>
+        <TrackerApp />
+      </Suspense>
+    ) : (
+      <App />
+    )}
   </React.StrictMode>
 );
